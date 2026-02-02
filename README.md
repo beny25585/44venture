@@ -1,27 +1,80 @@
-# Full Stack Starter Code (React + Express + MongoDB)
+# Full-Stack Starter (React + Express + MongoDB)
 
-A minimal full-stack boilerplate with:
+A full-stack boilerplate with a **React/Vite** frontend and a **Node/Express + MongoDB (Mongoose)** backend.
 
-- **Frontend**: React + Vite + TypeScript + Tailwind (v4) + shadcn/ui, React Router v7, Redux Toolkit (RTK + RTK Query), optional `socket.io-client` wiring.
-- **Backend**: Node.js + TypeScript (ESM) + Express + MongoDB (Mongoose).
-
-This README documents what’s actually implemented in this repo today (scripts, env vars, routes, and project structure).
+This README focuses on **what technologies are used** and **how the frontend/backend are structured** (architecture), based on the actual code in this repo.
 
 ---
 
-## Prerequisites
+## Tech stack (at a glance)
 
-- **Node.js >= 22** (required by `backend/package.json`).
-- **MongoDB** (local instance or MongoDB Atlas cluster).
+### Frontend (`frontend/`)
+
+- **Runtime / bundler**: Vite + TypeScript (ESM)
+- **UI**: React 19
+- **Routing**: React Router v7 (`RouterProvider` + `createBrowserRouter`)
+- **State**: Redux Toolkit slices + **RTK Query** for data fetching
+- **Styling**: Tailwind CSS v4 + `@tailwindcss/vite`
+- **Component library**: shadcn/ui (New York style) + Radix primitives + Lucide icons
+- **Forms & validation**: React Hook Form + Zod (+ resolvers)
+- **Charts / tables / animation**: Recharts, TanStack Table, Motion
+- **Realtime (client)**: `socket.io-client` with a provider + hooks pattern
+- **Tooling**: ESLint (type-aware) + Prettier
+
+### Backend (`backend/`)
+
+- **Runtime**: Node.js (ESM) + TypeScript
+- **HTTP server**: Express 5
+- **Database**: MongoDB via Mongoose
+- **Security headers**: `helmet`
+- **CORS**: `cors` middleware (origin controlled by env var)
+- **Env loading**: `dotenv/config`
+- **Dev runner**: `tsx` (including watch mode)
 
 ---
 
-## Repo structure
+## Project structure
 
 ```
 full-stack-starter-code/
-  backend/   # Express + Mongoose API
-  frontend/  # React + Vite app
+  backend/
+    src/
+      index.ts           # Express app bootstrap (middleware + routes + start)
+      utils.ts           # Mongo connection + startServer helper
+      models/            # Mongoose schemas/models
+      routes/            # Express routers
+  frontend/
+    src/
+      main.tsx           # React entry + Redux Provider
+      App.tsx            # RouterProvider
+      router/            # route definitions
+      ui/                # layout + pages
+      store/             # Redux store + slices + RTK Query APIs
+      sockets/           # socket.io client provider + hooks
+      shadcn/            # shadcn/ui components, utils, registries
+      styles/            # Tailwind v4 CSS entry
+      types/             # shared frontend types
+      consts/            # constants + env accessors
+```
+
+---
+
+## Setup / installation
+
+This repo is **two separate Node projects** (`backend/` and `frontend/`). Install dependencies in each.
+
+### Backend
+
+```bash
+cd backend
+npm i
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm i
 ```
 
 ---
@@ -32,193 +85,186 @@ full-stack-starter-code/
 
 Used in `backend/src/index.ts`:
 
-- **`MONGODB_URI`**: Mongo connection string (required).
-- **`FRONTEND_URL`**: Allowed CORS origin (example: `http://localhost:5173`).
-- **`PORT`**: Backend port (default: `3000`).
-
-The repo includes a `backend/.env` file with placeholder values. Update it locally before running.
+- **`MONGODB_URI`** (required): Mongo connection string
+- **`FRONTEND_URL`**: allowed CORS origin (example: `http://localhost:5173`)
+- **`PORT`**: server port (defaults to `3000`)
 
 ### Frontend (`frontend/.env.development`, `frontend/.env.production`)
 
 Used in `frontend/src/consts/consts.ts`:
 
-- **`VITE_API_URL`**: Base URL for your backend API (example: `http://localhost:3000`).
+- **`VITE_API_URL`**: backend base URL (example: `http://localhost:3000`)
 
 ---
 
-## Quick start (local development)
+## Running locally
 
-### 1) Start the backend
+Run the backend and frontend in **two terminals**.
+
+### Terminal 1: backend
 
 ```bash
 cd backend
-npm install
-# edit backend/.env (set MONGODB_URI, FRONTEND_URL, PORT)
 npm run dev
 ```
 
-Backend runs on `http://localhost:3000` by default.
-
-Health check:
-
-```bash
-curl http://localhost:3000/health
-```
-
-### 2) Start the frontend
+### Terminal 2: frontend
 
 ```bash
 cd frontend
-npm install
-# edit frontend/.env.development (VITE_API_URL)
 npm run dev
 ```
 
-Frontend runs on `http://localhost:5173` by default.
-
 ---
 
-## Backend API
+## Frontend architecture
 
-Base URL (local): `http://localhost:3000`
+### App entry + routing
 
-### Health
-
-- **GET `/health`** → `{ "ok": true }`
-
-### Users (`/users`)
-
-Implemented in `backend/src/routes/users.ts`.
-
-- **GET `/users`**: list all users
-- **GET `/users/:id`**: get user by id
-- **POST `/users`**: create a user
-  - Body: `{ "email": string, "name": string }`
-  - Notes: `email` is unique; duplicates return **409**
-
-Create user example:
-
-```bash
-curl -X POST "http://localhost:3000/users" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@example.com","name":"Demo User"}'
-```
-
-PowerShell example:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri "http://localhost:3000/users" -ContentType "application/json" -Body (@{
-  email = "demo@example.com"
-  name  = "Demo User"
-} | ConvertTo-Json)
-```
-
-### Posts (`/posts`)
-
-Implemented in `backend/src/routes/posts.ts`.
-
-- **GET `/posts`**: list posts (sorted newest first), with `createdBy` populated (email + name)
-- **GET `/posts/:id`**: get post by id (with `createdBy` populated)
-- **POST `/posts`**: create a post and link it into the owning user’s `posts[]`
-  - Body: `{ "createdBy": string, "title": string, "content": string }`
-- **PATCH `/posts/:id`**: update title/content
-  - Body: `{ "title"?: string, "content"?: string }`
-- **DELETE `/posts/:id`**: delete post and remove it from the owning user’s `posts[]`
-
-Create post example (replace `USER_ID`):
-
-```bash
-curl -X POST "http://localhost:3000/posts" \
-  -H "Content-Type: application/json" \
-  -d '{"createdBy":"USER_ID","title":"Hello","content":"First post"}'
-```
-
-PowerShell example:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri "http://localhost:3000/posts" -ContentType "application/json" -Body (@{
-  createdBy = "USER_ID"
-  title     = "Hello"
-  content   = "First post"
-} | ConvertTo-Json)
-```
-
-List posts example:
-
-```bash
-curl http://localhost:3000/posts
-```
-
-PowerShell example:
-
-```powershell
-Invoke-RestMethod -Method Get -Uri "http://localhost:3000/posts"
-```
-
-### Data model notes
-
-Defined in:
-
-- `backend/src/models/User.ts`
-- `backend/src/models/Post.ts`
-
-Relationship:
-
-- `User.posts[]` holds an array of Post ObjectIds
-- `Post.createdBy` references the owning User
-
-Deleting a post also pulls it out of `User.posts[]` (see `DELETE /posts/:id`).
-
----
-
-## Frontend
-
-### Routing
-
-Routes live in `frontend/src/router/index.ts`:
-
-- `/` → `Home`
-- `*` → `NotFound`
-
-The root layout component is `frontend/src/ui/Root.tsx`.
+- `frontend/src/main.tsx` mounts the app and wraps it with the Redux `<Provider store={store} />`.
+- `frontend/src/App.tsx` renders React Router’s `<RouterProvider />`.
+- `frontend/src/router/index.ts` defines routes using `createBrowserRouter`:
+  - `/` → `Root` layout → `Home` page
+  - `*` → `NotFound`
+- `frontend/src/ui/Root.tsx` is the **layout wrapper**. It currently wraps the app in `SocketProvider` and renders an `<Outlet />` for nested routes.
 
 ### State management (Redux Toolkit + RTK Query)
 
-Store setup: `frontend/src/store/index.ts`
+- `frontend/src/store/index.ts` configures the Redux store:
+  - classic slices (example: `user`, `counter`)
+  - RTK Query API slice(s) (example: `pokemonApi`)
+- `frontend/src/store/hooks/index.ts` exports typed hooks:
+  - `useAppDispatch`
+  - `useAppSelector`
+- `frontend/src/store/apis/pokemon.api.ts` is a working RTK Query example hitting the public PokeAPI.
 
-- Slices:
-  - `frontend/src/store/slices/user.slice.ts`
-  - `frontend/src/store/slices/counter.slice.ts`
-- RTK Query example:
-  - `frontend/src/store/apis/pokemon.api.ts` (hits `https://pokeapi.co/api/v2`)
-- Typed hooks:
-  - `frontend/src/store/hooks/index.ts`
+How to think about it:
 
-### UI components
+- **Slices** hold local UI/app state.
+- **RTK Query** holds server/cache state and generates hooks (e.g. `useLazyGetPokemonByNameQuery`).
 
-- Tailwind CSS (v4) is configured in the frontend.
-- shadcn/ui components live under `frontend/src/shadcn/components/ui/`.
+### Styling + UI components
+
+- Tailwind CSS v4 is enabled via `@tailwindcss/vite` (see `frontend/vite.config.ts`).
+- The Tailwind entry file is `frontend/src/styles/index.css`.
+- shadcn/ui is configured in `frontend/components.json` and components live under `frontend/src/shadcn/components/ui/`.
 
 ### Path aliases
 
-`@/` resolves to `frontend/src` (see `frontend/vite.config.ts` and `frontend/tsconfig*.json`).
+- `@/` resolves to `frontend/src` (configured in `frontend/vite.config.ts` and `frontend/tsconfig*.json`).
+
+### Sockets (client-only)
+
+The repo includes a reusable **Socket.IO client** wrapper:
+
+- Provider: `frontend/src/sockets/SocketProvider.tsx`
+  - accepts an array of URLs
+  - creates and manages one socket connection per URL
+  - exposes connection status per URL
+- Hooks:
+  - `frontend/src/sockets/useSockets.ts`
+  - `frontend/src/sockets/useSocketStatuses.ts`
+
+To enable sockets, add URLs in `frontend/src/ui/Root.tsx` (currently it’s an empty array).
+
+Note: there is **no Socket.IO server** implemented in the backend in this repo.
 
 ---
 
-## Sockets (client-only starter)
+## Backend architecture
 
-There is a Socket.IO **client** provider in `frontend/src/sockets/SocketProvider.tsx`.
+### Bootstrap and middleware
 
-To enable connections, add one or more socket server URLs in `frontend/src/ui/Root.tsx`:
+`backend/src/index.ts`:
 
-- `const socketUrls = useMemo(() => ["https://your-socket-server"], []);`
+- Creates an Express app
+- Adds middleware:
+  - `helmet()`
+  - `express.json()`
+  - `express.urlencoded({ extended: true })`
+  - `cors({ origin: process.env.FRONTEND_URL, credentials: true })`
+- Registers routers:
+  - `/users` → `usersRouter`
+  - `/posts` → `postsRouter`
+- Adds fallback handlers:
+  - 404 handler for unknown routes
+  - last-resort error handler (500)
+- Reads config from env:
+  - `PORT` (default 3000)
+  - `MONGODB_URI` (required)
+- Connects to MongoDB and starts the server
 
-Then access sockets/statuses via:
+`backend/src/utils.ts`:
 
-- `frontend/src/sockets/useSockets.ts`
-- `frontend/src/sockets/useSocketStatuses.ts`
+- `connectToMongoDB(uri)` uses `mongoose.connect(...)`
+- `startServer(app, port)` starts the HTTP server and returns the `Server` instance
 
-Note: this repo does **not** currently include a Socket.IO server on the backend.
+### Data models
+
+- `backend/src/models/User.ts`
+  - `email` (unique), `name`, `posts: ObjectId[]` referencing Post
+- `backend/src/models/Post.ts`
+  - `createdBy: ObjectId` referencing User, `title`, `content`
+
+Relationship:
+
+- A `User` owns many `Post`s (via `User.posts[]`)
+- A `Post` belongs to a `User` (via `Post.createdBy`)
+
+---
+
+## Backend routes (concise)
+
+### `GET /health`
+
+- Returns `{ ok: true }`
+
+### Users: `/users` (`backend/src/routes/users.ts`)
+
+- **GET `/users`**
+  - 200: list all users
+  - 500: server error
+- **GET `/users/:id`**
+  - 200: user
+  - 400: invalid ObjectId
+  - 404: not found
+  - 500: server error
+- **POST `/users`**
+  - Body: `{ email: string, name: string }`
+  - 201: created user
+  - 400: missing/invalid fields
+  - 409: duplicate email
+  - 500: server error
+
+### Posts: `/posts` (`backend/src/routes/posts.ts`)
+
+- **GET `/posts`**
+  - 200: list posts (sorted newest first), `createdBy` populated with user `email` + `name`
+  - 500: server error
+- **GET `/posts/:id`**
+  - 200: post (with populated `createdBy`)
+  - 400: invalid ObjectId
+  - 404: not found
+  - 500: server error
+- **POST `/posts`**
+  - Body: `{ createdBy: string, title: string, content: string }`
+  - 201: created post
+  - 400: missing fields / invalid `createdBy`
+  - 404: user not found
+  - 500: server error
+  - Side effect: pushes the post id into the owning user’s `posts[]`
+- **PATCH `/posts/:id`**
+  - Body: `{ title?: string, content?: string }` (at least one required)
+  - 200: updated post
+  - 400: invalid ObjectId / no fields provided
+  - 404: not found
+  - 500: server error
+- **DELETE `/posts/:id`**
+  - 204: deleted
+  - 400: invalid ObjectId
+  - 404: not found
+  - 500: server error
+  - Side effect: pulls the post id from the owning user’s `posts[]`
 
 ---
 
@@ -226,31 +272,14 @@ Note: this repo does **not** currently include a Socket.IO server on the backend
 
 ### Backend (`backend/package.json`)
 
-```bash
-npm run dev        # tsx watch src/index.ts
-npm run start      # tsx src/index.ts
-npm run build      # tsc (outputs to dist/)
-npm run typecheck  # tsc --noEmit
-```
+- `npm run dev`: run with watch (`tsx watch src/index.ts`)
+- `npm run start`: run once (`tsx src/index.ts`)
+- `npm run build`: compile TS (`tsc`)
+- `npm run typecheck`: typecheck only (`tsc --noEmit`)
 
 ### Frontend (`frontend/package.json`)
 
-```bash
-npm run dev
-npm run build
-npm run preview
-npm run typecheck
-npm run lint
-npm run lint:fix
-npm run format
-npm run format:check
-npm run check
-```
-
----
-
-## Troubleshooting
-
-- **Mongo connection fails**: ensure `MONGODB_URI` is set and reachable (if using Atlas, your IP/network access must allow the connection).
-- **CORS errors**: set `FRONTEND_URL` in `backend/.env` to match the frontend origin (default: `http://localhost:5173`). The backend enables CORS with `credentials: true`.
-- **Frontend calling wrong API**: ensure `frontend/.env.development` has `VITE_API_URL=http://localhost:3000` (or your deployed backend URL).
+- `npm run dev`: start Vite dev server
+- `npm run build`: typecheck/build
+- `npm run preview`: preview the production build
+- `npm run check`: typecheck + lint + format check
