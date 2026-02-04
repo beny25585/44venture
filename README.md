@@ -41,8 +41,10 @@ full-stack-starter-code/
     src/
       index.ts           # Express app bootstrap (middleware + routes + start)
       utils.ts           # Mongo connection + startServer helper
+      controllers/       # Route handlers (business logic)
       models/            # Mongoose schemas/models
       routes/            # Express routers
+      types/             # Backend TypeScript types (params/bodies/shared shapes)
       validators/        # Express request validation middleware
   frontend/
     src/
@@ -199,6 +201,15 @@ Note: there is **no Socket.IO server** implemented in the backend in this repo.
 
 - `connectToMongoDB(uri)` uses `mongoose.connect(...)`
 - `startServer(app, port)` starts the HTTP server and returns the `Server` instance
+
+### Request / DTO types
+
+The backend keeps shared TypeScript shapes under `backend/src/types/` (examples: `ObjectIdParams`, `CreateUserBody`, `CreatePostBody`). These are used in:
+
+- **Controllers**: casting `req.params` / `req.body` to known shapes
+- **Validators**: casting `req.params` / `req.body` for field checks
+
+Note: these types are **compile-time only** (they don’t change runtime validation/behavior).
 
 ### Data models
 
