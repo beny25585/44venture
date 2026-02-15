@@ -18,8 +18,9 @@ AI Content Editor API - Transform Google Trends into viral video scripts with pr
 3. **Configure environment**
    ```bash
    cp .env.example .env
-   # Add your OpenAI API key to .env:
+   # Add your API keys to .env:
    OPENAI_API_KEY=sk-...
+   PERPLEXITY_API_KEY=pplx-...   # Required for /search endpoint
    ```
 
 ## Run
@@ -32,6 +33,14 @@ uvicorn main:app --reload --port 8000
 - Docs: http://localhost:8000/docs
 
 ## API
+
+### `GET /search`
+
+Search the web via Perplexity API. Returns ranked results with title, url, snippet.
+
+**Query params:**
+- `q` (required): Search query
+- `max_results`: Max results (default 10, max 20)
 
 ### `GET /generate-trend-content`
 

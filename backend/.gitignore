@@ -1,6 +1,7 @@
 node_modules
 dist
 *.tsbuildinfo
+.env
 
 # Remember to uncomment the .env after cloning!
 # .env

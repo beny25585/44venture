@@ -3,6 +3,9 @@ import 'dotenv/config';
 import { connectToMongoDB, startServer } from './utils.js';
 import { usersRouter } from './routes/users.routes.js';
 import { postsRouter } from './routes/posts.routes.js';
+import { literlyRouter } from './routes/literly.routes.js';
+import { redditRouter } from './routes/reddit.routes.js';
+import { startDailyContentAgent } from './services/daily-content-agent.js';
 import cors from 'cors';
 import helmet from 'helmet';
 // create a new express application
@@ -36,6 +39,8 @@ app.get('/health', (_req, res) => {
 // initialize routers
 app.use('/users', usersRouter);
 app.use('/posts', postsRouter);
+app.use('/literly', literlyRouter);
+app.use('/reddit', redditRouter);
 
 // if the route is not found, return a 404 error
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
@@ -52,9 +57,13 @@ const uri = process.env.MONGODB_URI;
 
 // main function to start the server
 async function main() {
-  if (!uri) throw new Error('MONGODB_URI is not set');
+  if (uri) {
+    await connectToMongoDB(uri);
+  } else {
+    console.log('⚠️ MONGODB_URI not set – running without MongoDB (users/posts will not work)');
+  }
 
-  await connectToMongoDB(uri);
+  startDailyContentAgent();
 
   await startServer(app, port);
   console.log(`✅ Server is running on port ${port}! 🚀`);

@@ -1,47 +1,50 @@
-import { Button } from '@/shadcn/components/ui/button';
-import { useLazyGenerateTrendContentQuery } from '@/store/apis/literly.api';
-import { useAppSelector } from '@/store/hooks';
+import { useTodayContentQuery } from '@/store/apis/literly.api';
 import { Link } from 'react-router';
 
 export function Home() {
-  const name = useAppSelector((store) => store.user.name);
-
-  const [generateContent, { data, isLoading, error }] = useLazyGenerateTrendContentQuery();
-
-  function onGenerate() {
-    void generateContent();
-  }
+  const { data, isLoading, error } = useTodayContentQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    refetchInterval: 60_000,
+  });
 
   return (
-    <div className="space-y-4 p-4">
-      <h1>Literly {name && `— ${name}`}</h1>
-      <p className="text-muted-foreground">Generate viral video scripts from Google Trends</p>
+    <div className="space-y-6 p-4 max-w-4xl mx-auto">
+      <h1>Literly</h1>
 
-      <div className="flex gap-2 items-center">
-        <Button variant="outline" disabled={isLoading} onClick={onGenerate}>
-          {isLoading ? 'Generating...' : 'Generate Trend Content'}
-        </Button>
-      </div>
-
-      {isLoading && <div>Loading...</div>}
-      {error && <div className="text-destructive">Error: {JSON.stringify(error, null, 2)}</div>}
-
-      {data && (
-        <div className="space-y-3 rounded-lg border p-4">
-          <h2 className="font-semibold">Trends ({data.region})</h2>
-          <ul className="list-disc list-inside">{data.trends.map((t, i) => <li key={i}>{t}</li>)}</ul>
-          <h2 className="font-semibold">Predicted sub-trend (7 days)</h2>
-          <p>{data.predicted_sub_trend}</p>
-          <h2 className="font-semibold">Video Brief</h2>
-          <p><strong>Hook:</strong> {data.video_brief.hook}</p>
-          <p><strong>Body:</strong></p>
-          <ul className="list-disc list-inside">{data.video_brief.body_points.map((b, i) => <li key={i}>{b}</li>)}</ul>
-          <p><strong>CTA:</strong> {data.video_brief.cta}</p>
-          <p><strong>Visuals:</strong> {data.video_brief.visual_suggestions.join(' • ')}</p>
-        </div>
+      {isLoading && <p className="text-muted-foreground">טוען...</p>}
+      {error && (
+        <p className="text-destructive">לא זמין כרגע. נסה שוב בעוד דקה.</p>
       )}
 
-      <Link to="/not-found">Not Found</Link>
+      {data && (
+        <>
+          <h2>{data.label}</h2>
+          <ul className="space-y-3">
+            {data.results.map((r, i) => (
+              <li key={i} className="rounded-lg border p-3 hover:bg-muted/50">
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline block"
+                >
+                  {r.title}
+                </a>
+                <p className="text-sm text-muted-foreground mt-1">{r.snippet}</p>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <div className="flex gap-4">
+        <Link to="/" className="text-primary hover:underline">
+          ← חיפוש בדיחות
+        </Link>
+        <Link to="/reddit-hot" className="text-primary hover:underline">
+          מה חם ב-Reddit →
+        </Link>
+      </div>
     </div>
   );
 }
