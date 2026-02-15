@@ -3,3 +3,7 @@ export type CreateUserBody = {
   name: string;
 };
 
+export type UpdateUserNameBody = {
+  name: string;
+};
+

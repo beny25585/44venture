@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import type { ObjectIdParams } from '../types/common.types.js';
-import type { CreateUserBody } from '../types/user.types.js';
+import type { CreateUserBody, UpdateUserNameBody } from '../types/user.types.js';
 
 export function validateUserId(req: Request, res: Response, next: NextFunction) {
   const { id } = req.params as Partial<ObjectIdParams>;
@@ -25,6 +25,24 @@ export function validateCreateUser(req: Request, res: Response, next: NextFuncti
   }
   if (!email.trim() || !name.trim()) {
     return res.status(400).json({ message: 'email and name cannot be empty' });
+  }
+
+  return next();
+}
+
+export function validateUpdateUserName(req: Request, res: Response, next: NextFunction) {
+  if (!req.body) return res.status(400).json({ message: 'body is required' });
+
+  const { name } = req.body as Partial<UpdateUserNameBody>;
+
+  if (!name) {
+    return res.status(400).json({ message: 'name is required' });
+  }
+  if (typeof name !== 'string') {
+    return res.status(400).json({ message: 'name must be a string' });
+  }
+  if (!name.trim()) {
+    return res.status(400).json({ message: 'name cannot be empty' });
   }
 
   return next();

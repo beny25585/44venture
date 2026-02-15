@@ -1,42 +1,46 @@
 import { Button } from '@/shadcn/components/ui/button';
-import { SlidingNumber } from '@/shadcn/registeries/animate-ui/primitives/texts/sliding-number';
-import { useSockets } from '@/sockets/useSockets';
-import { useSocketStatuses } from '@/sockets/useSocketStatuses';
-import { useLazyGetPokemonByNameQuery } from '@/store/apis/pokemon.api';
+import { useLazyGenerateTrendContentQuery } from '@/store/apis/literly.api';
 import { useAppSelector } from '@/store/hooks';
-import { useState } from 'react';
 import { Link } from 'react-router';
 
 export function Home() {
   const name = useAppSelector((store) => store.user.name);
 
-  const [search, setSearch] = useState('');
+  const [generateContent, { data, isLoading, error }] = useLazyGenerateTrendContentQuery();
 
-  const [getPokemon, { data, isLoading, error }] = useLazyGetPokemonByNameQuery();
-
-  const { sockets, getSocket } = useSockets();
-  // const { statuses, getStatus } = useSocketStatuses();
-
-  function onFindPokemon() {
-    void getPokemon(search);
+  function onGenerate() {
+    void generateContent();
   }
 
   return (
-    <div>
-      Hello from Home {name}
-      <input
-        className="rounded-md border-2 border-gray-300 p-2"
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <SlidingNumber number={99999} />
-      <Button variant="outline" disabled={isLoading} onClick={onFindPokemon}>
-        Find Pokemon
-      </Button>
+    <div className="space-y-4 p-4">
+      <h1>Literly {name && `— ${name}`}</h1>
+      <p className="text-muted-foreground">Generate viral video scripts from Google Trends</p>
+
+      <div className="flex gap-2 items-center">
+        <Button variant="outline" disabled={isLoading} onClick={onGenerate}>
+          {isLoading ? 'Generating...' : 'Generate Trend Content'}
+        </Button>
+      </div>
+
       {isLoading && <div>Loading...</div>}
-      {error && <div>Error: {JSON.stringify(error, null, 2)}</div>}
-      <div>{JSON.stringify(data, null, 2)}</div>
+      {error && <div className="text-destructive">Error: {JSON.stringify(error, null, 2)}</div>}
+
+      {data && (
+        <div className="space-y-3 rounded-lg border p-4">
+          <h2 className="font-semibold">Trends ({data.region})</h2>
+          <ul className="list-disc list-inside">{data.trends.map((t, i) => <li key={i}>{t}</li>)}</ul>
+          <h2 className="font-semibold">Predicted sub-trend (7 days)</h2>
+          <p>{data.predicted_sub_trend}</p>
+          <h2 className="font-semibold">Video Brief</h2>
+          <p><strong>Hook:</strong> {data.video_brief.hook}</p>
+          <p><strong>Body:</strong></p>
+          <ul className="list-disc list-inside">{data.video_brief.body_points.map((b, i) => <li key={i}>{b}</li>)}</ul>
+          <p><strong>CTA:</strong> {data.video_brief.cta}</p>
+          <p><strong>Visuals:</strong> {data.video_brief.visual_suggestions.join(' • ')}</p>
+        </div>
+      )}
+
       <Link to="/not-found">Not Found</Link>
     </div>
   );
