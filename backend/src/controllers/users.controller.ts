@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { UserModel } from '../models/User.model.js';
 import type { ObjectIdParams } from '../types/common.types.js';
-import type { CreateUserBody } from '../types/user.types.js';
+import type { CreateUserBody, UpdateUserNameBody } from '../types/user.types.js';
 
 export async function listUsers(_req: Request, res: Response) {
   try {
@@ -38,6 +38,27 @@ export async function createUser(req: Request, res: Response) {
       return res.status(409).json({ message: 'email already exists' });
     }
     console.log(err);
+    return res.status(500).json({ message: 'server error' });
+  }
+}
+
+export async function updateUserName(req: Request, res: Response) {
+  try {
+    const { id } = req.params as ObjectIdParams;
+    const { name } = req.body as UpdateUserNameBody;
+
+    const user = await UserModel.findByIdAndUpdate(
+      id,
+      { name: name.trim() },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'user not found' });
+    }
+
+    return res.status(200).json(user);
+  } catch (_err) {
     return res.status(500).json({ message: 'server error' });
   }
 }
