@@ -8,10 +8,7 @@ export function Root() {
 
   return (
     <SocketProvider urls={socketUrls}>
-      <div>
-        Hello from Root
-        <Outlet />
-      </div>
+      <Outlet />
     </SocketProvider>
   );
 }
