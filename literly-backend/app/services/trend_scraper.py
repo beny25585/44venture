@@ -48,3 +48,30 @@ def fetch_daily_trends(region: str = "US", limit: int = 5, use_fallback: bool = 
         if use_fallback:
             return FALLBACK_TRENDS[:limit]
         raise
+
+
+def fetch_realtime_trends(
+    region: str = "US", limit: int = 10, use_fallback: bool = True
+) -> tuple[list[str], str]:
+    """
+    Fetch realtime trending searches. Tries realtime_trending_searches first,
+    falls back to today_searches if unavailable.
+
+    Returns:
+        (trends list, source: "realtime" | "daily")
+    """
+    geo = REGION_TO_GEO.get(region)
+    if not geo:
+        raise ValueError(f"Unsupported region: {region}. Use 'US' or 'Israel'.")
+
+    try:
+        pytrends = TrendReq(hl="en-US", tz=360)
+        if hasattr(pytrends, "realtime_trending_searches"):
+            df = pytrends.realtime_trending_searches(pn=geo)
+            trends = df.tolist() if hasattr(df, "tolist") else df.iloc[:, -1].tolist()
+            return (trends[:limit], "realtime")
+    except (pytrends_exceptions.ResponseError, Exception):
+        pass
+
+    trends = fetch_daily_trends(region=region, limit=limit, use_fallback=use_fallback)
+    return (trends, "daily")
