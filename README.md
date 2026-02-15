@@ -85,39 +85,40 @@ npm i
 
 ## Environment variables
 
-### Backend (`backend/.env`)
+### literly-backend (`literly-backend/.env`)
 
-Used in `backend/src/index.ts`:
+- **`OPENAI_API_KEY`**: For generate-trend-content
+- **`PERPLEXITY_API_KEY`**: For search and today-content agent
 
-- **`MONGODB_URI`** (required): Mongo connection string
-- **`FRONTEND_URL`**: allowed CORS origin (example: `http://localhost:5173`)
-- **`PORT`**: server port (defaults to `3000`)
+### Frontend (`frontend/.env.development`)
 
-### Frontend (`frontend/.env.development`, `frontend/.env.production`)
-
-Used in `frontend/src/consts/consts.ts`:
-
-- **`VITE_API_URL`**: backend base URL (example: `http://localhost:3000`)
+- **`VITE_LITERLY_API_URL`**: literly-backend URL (default: `http://localhost:8001`)
 
 ---
 
 ## Running locally
 
-Run the backend and frontend in **two terminals**.
+Only **literly-backend** (Python) and **frontend** are needed.
 
-### Terminal 1: backend
+### Terminal 1: literly-backend (Python)
 
 ```bash
-cd backend
-npm run dev
+cd literly-backend
+python -m venv venv
+venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+python -m uvicorn main:app --reload --port 8001
 ```
 
 ### Terminal 2: frontend
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
+
+The frontend calls literly-backend directly. Set `VITE_LITERLY_API_URL=http://localhost:8001` in `frontend/.env.development`.
 
 ---
 
