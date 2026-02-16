@@ -6,24 +6,19 @@
 When asking me (the AI) to implement features, use this format:
 
 ```
-I want you to [WHAT TO DO]. Do it according to project's best practices, make sure to focus on the @backend only. Validate yourself before we continue. Make minimal changes. [Add more sentences that define HOW to do and approach the task, not just WHAT to do.]
+I want you to [WHAT TO DO]. Do it according to project's best practices, make sure to focus on the @literly-backend only. Validate yourself before we continue. Make minimal changes. [Add more sentences that define HOW to do and approach the task, not just WHAT to do.]
 ```
 
 ### Example Prompts
 
-**Create a new route:**
+**Create a new endpoint:**
 ```
-I want you to create a route for updating the user's name. Do it according to project's best practices, make sure to focus on the @backend only. Validate yourself before we continue. Make minimal changes.
-```
-
-**Create a new model:**
-```
-I want you to create a Mongoose model for trends. Do it according to project's best practices, make sure to focus on the @backend only. Follow the existing pattern in backend/src/models/. Validate yourself before we continue.
+I want you to create an endpoint for [action]. Do it according to project's best practices, make sure to focus on the @literly-backend only. Validate yourself before we continue. Make minimal changes.
 ```
 
 **Add a feature:**
 ```
-I want you to add Reddit API integration to fetch trending posts. Do it according to project's best practices, make sure to focus on the @backend only. Use environment variables for API keys. Make minimal changes.
+I want you to add Reddit API integration to fetch trending posts. Do it according to project's best practices, make sure to focus on the @literly-backend only. Use environment variables for API keys. Make minimal changes.
 ```
 
 ## Project Overview
@@ -145,8 +140,7 @@ POST /api/feedback           - Submit performance feedback
 
 ## Tech Stack
 
-- **Frontend:** React 19 + Vite + TypeScript + Tailwind + shadcn/ui + Redux
-- **Backend:** Express 5 + Node.js + MongoDB (Mongoose)
+- **API:** FastAPI + Python (literly-backend REST API only)
 - **External APIs:**
   - Reddit: PRAW (Python) or snoowrap (JavaScript) - FREE
   - Twitter: Twitter API v2 - $100+/month
