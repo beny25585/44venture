@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+from mangum import Mangum
 
 load_dotenv(Path(__file__).parent / ".env")
 
@@ -73,6 +74,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Lambda handler for API Gateway
+handler = Mangum(app)
 
 # CORS middleware with environment-based configuration
 app.add_middleware(
