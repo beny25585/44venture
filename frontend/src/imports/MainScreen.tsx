@@ -1,3 +1,6 @@
+import React, { useEffect, useState } from "react";
+import { searchMemes } from "../api/humor";
+import { getTrendsSerpApi } from "../api/trends";
 import svgPaths from "./svg-tshnagkltz";
 const imgImageDogLearnsToOpenFridgeChaosEnsues = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&h=600&fit=crop";
 const imgImageMikeChen = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop";
@@ -1083,8 +1086,23 @@ function Container41() {
 }
 
 export default function MainScreen() {
+  const [memes, setMemes] = useState<any[]>([]);
+
+  useEffect(() => {
+    getTrendsSerpApi().then((data) => {
+      console.log(data);
+      searchMemes({ keywords: data[1].query }).then((finalData) => {
+        console.log(finalData);
+        setMemes(finalData.data.memes);
+      });
+    });
+  }, []);
+
   return (
     <div className="bg-white relative size-full" data-name="Main screen">
+      {memes.length > 0 && memes.map((meme) => (
+        <img src={meme.url} alt="" />
+      ))}
       <PK />
       <Container39 />
       <Container41 />
