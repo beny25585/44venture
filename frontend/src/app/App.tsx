@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Home, User, Calendar, Users, Settings } from 'lucide-react';
+import { Calendar, Home, Settings, User, Users } from 'lucide-react';
+import React, { useState } from 'react';
 import { InterestFilter } from './components/InterestFilter';
 import { MasonryGrid } from './components/MasonryGrid';
 import { TopicDetailPage } from './components/TopicDetailPage';
@@ -36,9 +36,9 @@ export default function App() {
           <div className="w-12 h-12 rounded-lg flex items-center justify-center"
             style={{ backgroundColor: 'var(--primary)' }}
           >
-            <span 
+            <span
               className="text-2xl"
-              style={{ 
+              style={{
                 fontFamily: 'var(--font-family-heading)',
                 fontWeight: 'var(--font-weight-bold)'
               }}
@@ -59,15 +59,15 @@ export default function App() {
           >
             <Home className="w-6 h-6" />
           </button>
-          
+
           <button className="w-12 h-12 rounded-lg flex items-center justify-center hover:bg-muted transition-all duration-200">
             <User className="w-6 h-6" style={{ color: 'var(--muted-foreground)' }} />
           </button>
-          
+
           <button className="w-12 h-12 rounded-lg flex items-center justify-center hover:bg-muted transition-all duration-200">
             <Calendar className="w-6 h-6" style={{ color: 'var(--muted-foreground)' }} />
           </button>
-          
+
           <button className="w-12 h-12 rounded-lg flex items-center justify-center hover:bg-muted transition-all duration-200">
             <Users className="w-6 h-6" style={{ color: 'var(--muted-foreground)' }} />
           </button>
@@ -128,7 +128,7 @@ export default function App() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </button>
-            
+
             <div className="w-10 h-10 rounded-full overflow-hidden">
               <img
                 src={imgImageProfile}
@@ -144,7 +144,7 @@ export default function App() {
           <div className="flex flex-col gap-6">
             {/* Interest Filter Pills */}
             <InterestFilter interests={interests} />
-            
+
             {/* Masonry Grid */}
             <MasonryGrid onCardClick={() => setSelectedTopic(mockTopic)} />
           </div>
