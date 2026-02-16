@@ -48,4 +48,49 @@ uvicorn main:app --reload --port 8000
 | `HUMOR_API_KEY` | Yes | Humor API key |
 | `PORT` | No | Server port (default: 8000) |
 
+## API Usage Examples
+
+### Deployed (API Gateway + API Key)
+
+Set your API key:
+
+```bash
+export LITERLY_API_KEY="YOUR_API_KEY"
+```
+
+Health check:
+
+```bash
+curl -H "x-api-key: $LITERLY_API_KEY" \
+  "https://fdt4by1olk.execute-api.us-east-1.amazonaws.com/prod/health"
+```
+
+Trends (SerpApi):
+
+```bash
+curl -H "x-api-key: $LITERLY_API_KEY" \
+  "https://fdt4by1olk.execute-api.us-east-1.amazonaws.com/prod/api/v1/trends/serpapi?geo=US&hours=24&limit=10"
+```
+
+Reddit hot posts:
+
+```bash
+curl -H "x-api-key: $LITERLY_API_KEY" \
+  "https://fdt4by1olk.execute-api.us-east-1.amazonaws.com/prod/api/v1/reddit/hot?subreddit=technology&limit=3"
+```
+
+Random jokes:
+
+```bash
+curl -H "x-api-key: $LITERLY_API_KEY" \
+  "https://fdt4by1olk.execute-api.us-east-1.amazonaws.com/prod/api/v1/jokes/random?number=3"
+```
+
+### Local (No API Key)
+
+```bash
+curl "http://localhost:8000/health"
+curl "http://localhost:8000/api/v1/trends/serpapi?geo=US&hours=24&limit=10"
+```
+
 See [literly-backend/README.md](literly-backend/README.md) for full documentation.
