@@ -345,7 +345,7 @@ def jokes_search_endpoint(
 def memes_search_endpoint(
     keywords: str = Query(default="", description="Keywords to search for"),
     number: int = Query(default=20, ge=1, le=20, description="Number of memes to return"),
-    keywords_in_image: bool = Query(default=True, description="Search for keywords in image text"),
+    keywords_in_image: bool = Query(default=False, description="Search for keywords in image text"),
     media_type: str = Query(default="image", description="Filter by media type: image or video"),
 ):
     """Search memes.
