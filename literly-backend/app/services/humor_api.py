@@ -1,7 +1,8 @@
 """Humor API - jokes search proxy."""
-import os
 import random
 import httpx
+
+from app.config import HUMOR_API_KEY
 
 HUMOR_API_BASE = "https://api.humorapi.com"
 
@@ -20,11 +21,10 @@ def search_jokes(
 
     https://api.humorapi.com/jokes/search
     """
-    api_key = os.getenv("HUMOR_API_KEY")
-    if not api_key:
+    if not HUMOR_API_KEY:
         raise ValueError("HUMOR_API_KEY is not set in environment")
 
-    params: dict = {"api-key": api_key, "offset": offset, "number": number}
+    params: dict = {"api-key": HUMOR_API_KEY, "offset": offset, "number": number}
     if keywords:
         params["keywords"] = keywords
     if include_tags:
@@ -55,13 +55,27 @@ def get_random_jokes(number: int = 10) -> list[dict]:
     )
 
 
-def search_memes(keywords: str | None = None, number: int = 3) -> list[dict]:
-    """Search memes via Humor API (300,000+ memes from Reddit)."""
-    api_key = os.getenv("HUMOR_API_KEY")
-    if not api_key:
+def search_memes(
+    keywords: str | None = None,
+    number: int = 20,
+    keywords_in_image: bool = True,
+    media_type: str = "image",
+) -> list[dict]:
+    """
+    Search memes via Humor API (300,000+ memes from Reddit).
+
+    Matches Humor API format:
+    /memes/search?api-key=...&keywords=...&keywords-in-image=true&media-type=image&number=20
+    """
+    if not HUMOR_API_KEY:
         raise ValueError("HUMOR_API_KEY is not set in environment")
 
-    params: dict = {"api-key": api_key, "number": number}
+    params: dict = {
+        "api-key": HUMOR_API_KEY,
+        "number": number,
+        "keywords-in-image": str(keywords_in_image).lower(),
+        "media-type": media_type,
+    }
     if keywords:
         params["keywords"] = keywords
 
@@ -77,14 +91,13 @@ def search_memes(keywords: str | None = None, number: int = 3) -> list[dict]:
 
 def get_random_meme() -> dict:
     """Get a single random meme from Humor API."""
-    api_key = os.getenv("HUMOR_API_KEY")
-    if not api_key:
+    if not HUMOR_API_KEY:
         raise ValueError("HUMOR_API_KEY is not set in environment")
 
     with httpx.Client(timeout=15.0) as client:
         response = client.get(
             f"{HUMOR_API_BASE}/memes/random",
-            params={"api-key": api_key},
+            params={"api-key": HUMOR_API_KEY},
         )
 
     if response.status_code != 200:
